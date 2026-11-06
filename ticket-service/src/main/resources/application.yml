@@ -1,0 +1,79 @@
+# ============================================================
+#  ticket-service  |  Puerto 8083  |  BD: bd_ticket  (MariaDB)
+#  Perfil por defecto: dev  (cambiar con SPRING_PROFILES_ACTIVE=prod)
+# ============================================================
+spring:
+  application:
+    name: ticket-service
+  config:
+    import: optional:file:.env[.properties],optional:file:ticket-service/.env[.properties]
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    open-in-view: false
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+
+app:
+  ticket:
+    # true = solo usuarios con email verificado pueden crear tickets
+    requiere-usuario-verificado: true
+
+server:
+  port: 8083
+
+---
+# ------------------------- DEV -------------------------
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/bd_ticket?createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+services:
+  usuario:
+    url: ${USUARIO_SERVICE_URL:http://localhost:8081}
+  tecnico:
+    url: ${TECNICO_SERVICE_URL:http://localhost:8082}
+
+logging:
+  level:
+    com.tecsup: DEBUG
+
+---
+# ------------------------- PROD ------------------------
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/bd_ticket}
+    username: ${DB_USERNAME:soporte_app}
+    password: ${DB_PASSWORD:cambiar_clave}
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}
+    show-sql: false
+
+services:
+  usuario:
+    url: ${USUARIO_SERVICE_URL:http://usuario-service:8081}
+  tecnico:
+    url: ${TECNICO_SERVICE_URL:http://tecnico-service:8082}
+
+server:
+  port: ${SERVER_PORT:8083}
+
+logging:
+  level:
+    com.tecsup: INFO

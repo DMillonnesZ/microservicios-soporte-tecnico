@@ -1,0 +1,1620 @@
+{
+  "info": {
+    "name": "Soporte Tecnico - Microservicios (Lab 16)",
+    "description": "Pruebas de usuario-service (8081), tecnico-service (8082) y ticket-service (8083).\n\nOrden sugerido: 1 -> 2 -> 3 -> 4 -> 5.\nEn la carpeta 1, despues de 'Registrar usuario' revisa el correo {{emailVerificacion}} (o la consola si MAIL_ENABLED=false) y copia el codigo en la variable de entorno codigoVerificacion antes de 'Verificar email'.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Usuarios (8081)",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar usuario por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/1",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar usuario (envia codigo al correo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 200 || pm.response.code === 201) { pm.environment.set(\"idUsuarioNuevo\", pm.response.json().id); }",
+                  "pm.test(\"Queda NO verificado\", function () { pm.expect(pm.response.json().verificado).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Daniel Millones Vasquez\",\n  \"email\": \"{{emailVerificacion}}\",\n  \"telefono\": \"987111222\",\n  \"area\": \"Sistemas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Registra a Daniel y envia el codigo de 6 digitos a {{emailVerificacion}}. Copia el codigo en la variable codigoVerificacion."
+          }
+        },
+        {
+          "name": "Reenviar codigo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/{{idUsuarioNuevo}}/reenviar-codigo",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}",
+                "reenviar-codigo"
+              ]
+            },
+            "description": "Opcional: genera y envia un codigo nuevo (invalida el anterior)."
+          }
+        },
+        {
+          "name": "Verificar email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Queda verificado\", function () { pm.expect(pm.response.json().verificado).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/{{idUsuarioNuevo}}/verificar",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}",
+                "verificar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"{{codigoVerificacion}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Daniel Alejandro Millones Vasquez\",\n  \"email\": \"{{emailVerificacion}}\",\n  \"telefono\": \"987111333\",\n  \"area\": \"Soporte TI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Tecnicos (8082)",
+      "item": [
+        {
+          "name": "Listar tecnicos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar tecnico por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos/1",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar tecnico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 200 || pm.response.code === 201) { pm.environment.set(\"idTecnicoNuevo\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Marco Quispe Lopez\",\n  \"email\": \"marco.quispe@soporte.com\",\n  \"telefono\": \"945678123\",\n  \"especialidad\": \"Servidores\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Actualizar tecnico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos/{{idTecnicoNuevo}}",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos",
+                "{{idTecnicoNuevo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Marco Quispe Lopez\",\n  \"email\": \"marco.quispe@soporte.com\",\n  \"telefono\": \"945678999\",\n  \"especialidad\": \"Servidores y Redes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Tickets (8083)",
+      "item": [
+        {
+          "name": "Listar tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar ticket por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/1",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle ticket (ticket + usuario + tecnico)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Trae usuario y tecnico\", function () { const j = pm.response.json(); pm.expect(j.usuario).to.not.be.null; pm.expect(j.tecnico).to.not.be.null; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/1/detalle",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1",
+                "detalle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 200 || pm.response.code === 201) { pm.environment.set(\"idTicketNuevo\", pm.response.json().id); }",
+                  "pm.test(\"Estado inicial ABIERTO\", function () { pm.expect(pm.response.json().estado).to.eql(\"ABIERTO\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": {{idUsuarioNuevo}},\n  \"idTecnico\": {{idTecnicoNuevo}},\n  \"asunto\": \"Laptop no enciende\",\n  \"descripcion\": \"La laptop del area de Sistemas no enciende despues de la actualizacion.\",\n  \"prioridad\": \"ALTA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Actualizar ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/{{idTicketNuevo}}",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{idTicketNuevo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": {{idUsuarioNuevo}},\n  \"idTecnico\": {{idTecnicoNuevo}},\n  \"asunto\": \"Laptop no enciende (urgente)\",\n  \"descripcion\": \"La laptop no enciende; se requiere revisar la fuente de poder.\",\n  \"prioridad\": \"ALTA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado a EN_PROCESO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Estado EN_PROCESO\", function () { pm.expect(pm.response.json().estado).to.eql(\"EN_PROCESO\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/{{idTicketNuevo}}/estado",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{idTicketNuevo}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_PROCESO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado a CERRADO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Estado CERRADO con fecha de cierre\", function () { const j = pm.response.json(); pm.expect(j.estado).to.eql(\"CERRADO\"); pm.expect(j.fechaCierre).to.not.be.null; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/{{idTicketNuevo}}/estado",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{idTicketNuevo}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"CERRADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tickets por usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/usuario/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "usuario",
+                "{{idUsuarioNuevo}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tickets por tecnico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/tecnico/{{idTecnicoNuevo}}",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "tecnico",
+                "{{idTecnicoNuevo}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Errores",
+      "item": [
+        {
+          "name": "404 - Usuario inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/999",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - Usuario con campos vacios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});",
+                  "pm.test(\"Trae errores por campo\", function () { pm.expect(pm.response.json().errors).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"email\": \"\",\n  \"telefono\": \"123\",\n  \"area\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - Email con formato invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prueba Email\",\n  \"email\": \"daniel@tecsup\",\n  \"telefono\": \"987654321\",\n  \"area\": \"Sistemas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - Email duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Copia\",\n  \"email\": \"ana.torres@empresa.com\",\n  \"telefono\": \"987654321\",\n  \"area\": \"Ventas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - Codigo de verificacion incorrecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/4/verificar",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "4",
+                "verificar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - ID no numerico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos/abc",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - Tecnico inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos/999",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - Ticket inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/999",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - Ticket con campos vacios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asunto\": \"\",\n  \"descripcion\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - Prioridad invalida (URGENTE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"idTecnico\": 1,\n  \"asunto\": \"Prueba prioridad\",\n  \"descripcion\": \"Descripcion de prueba valida.\",\n  \"prioridad\": \"URGENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "404 - Ticket con usuario inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 999,\n  \"idTecnico\": 1,\n  \"asunto\": \"Usuario no existe\",\n  \"descripcion\": \"El usuario 999 no existe en usuario-service.\",\n  \"prioridad\": \"MEDIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "404 - Ticket con tecnico inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"idTecnico\": 999,\n  \"asunto\": \"Tecnico no existe\",\n  \"descripcion\": \"El tecnico 999 no existe en tecnico-service.\",\n  \"prioridad\": \"MEDIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - Ticket con usuario NO verificado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 4,\n  \"idTecnico\": 1,\n  \"asunto\": \"Usuario sin verificar\",\n  \"descripcion\": \"Jorge (id 4) no verifico su email.\",\n  \"prioridad\": \"BAJA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - Cambiar estado de ticket CERRADO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/4/estado",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "4",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ABIERTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - Transicion invalida (EN_PROCESO a ABIERTO)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/2/estado",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "2",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ABIERTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - Estado invalido (RESUELTO)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/1/estado",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"RESUELTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "503 - usuario-service apagado (manual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 503\", function () { pm.response.to.have.status(503); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"idTecnico\": 1,\n  \"asunto\": \"Servicio caido\",\n  \"descripcion\": \"Apagar usuario-service antes de enviar esta peticion.\",\n  \"prioridad\": \"MEDIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "MANUAL: detener usuario-service (IntelliJ: boton stop | Docker: docker compose stop usuario-service) y enviar. Luego volver a encenderlo."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Eliminar (limpieza)",
+      "item": [
+        {
+          "name": "Eliminar ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseTicket}}/api/tickets/{{idTicketNuevo}}",
+              "host": [
+                "{{baseTicket}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{idTicketNuevo}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar tecnico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseTecnico}}/api/tecnicos/{{idTecnicoNuevo}}",
+              "host": [
+                "{{baseTecnico}}"
+              ],
+              "path": [
+                "api",
+                "tecnicos",
+                "{{idTecnicoNuevo}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            },
+            "description": "Permite volver a ejecutar la coleccion (registrar de nuevo el mismo email)."
+          }
+        },
+        {
+          "name": "404 - Eliminar usuario ya eliminado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Formato ErrorResponse\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"status\");",
+                  "    pm.expect(j).to.have.property(\"message\");",
+                  "    pm.expect(j).to.have.property(\"path\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUsuario}}/api/usuarios/{{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUsuario}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{idUsuarioNuevo}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

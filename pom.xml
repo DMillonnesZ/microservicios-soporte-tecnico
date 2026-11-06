@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  POM agregador: permite abrir la carpeta "microservicios-soporte-tecnico" en IntelliJ
+  y que se importen los 3 microservicios a la vez. Cada servicio sigue siendo
+  un proyecto Maven independiente (se puede abrir y ejecutar por separado).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.tecsup</groupId>
+    <artifactId>microservicios-soporte-tecnico</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>microservicios-soporte-tecnico</name>
+
+    <modules>
+        <module>usuario-service</module>
+        <module>tecnico-service</module>
+        <module>ticket-service</module>
+    </modules>
+</project>

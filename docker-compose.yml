@@ -1,0 +1,98 @@
+# ==================================================================
+#  Sistema de Soporte Tecnico - Docker Compose
+#  Levantar:  docker compose up --build -d
+#  Ver logs:  docker compose logs -f
+#  Apagar:    docker compose down        (agrega -v para borrar la BD)
+#  Perfil por defecto: dev. Para prod: SPRING_PROFILES_ACTIVE=prod en el .env
+# ==================================================================
+services:
+
+  # ---------------- Base de datos (un servidor, 3 BD) ----------------
+  mariadb:
+    image: mariadb:11.4
+    container_name: soporte-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: America/Lima
+    ports:
+      - "3307:3306"          # 3307 en tu PC para no chocar con XAMPP (3306)
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database/script.sql:/docker-entrypoint-initdb.d/01-script.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - soporte-net
+
+  # ---------------- usuario-service ----------------
+  usuario-service:
+    build: ./usuario-service
+    image: soporte/usuario-service:1.0
+    container_name: usuario-service
+    env_file:
+      - ./usuario-service/.env      # MAIL_USERNAME, MAIL_PASSWORD, MAIL_ENABLED
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:mariadb://mariadb:3306/bd_usuario?createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "8081:8081"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - soporte-net
+
+  # ---------------- tecnico-service ----------------
+  tecnico-service:
+    build: ./tecnico-service
+    image: soporte/tecnico-service:1.0
+    container_name: tecnico-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:mariadb://mariadb:3306/bd_tecnico?createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "8082:8082"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - soporte-net
+
+  # ---------------- ticket-service ----------------
+  ticket-service:
+    build: ./ticket-service
+    image: soporte/ticket-service:1.0
+    container_name: ticket-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:mariadb://mariadb:3306/bd_ticket?createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+      # Dentro de Docker los servicios se encuentran por su nombre
+      USUARIO_SERVICE_URL: http://usuario-service:8081
+      TECNICO_SERVICE_URL: http://tecnico-service:8082
+    ports:
+      - "8083:8083"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      usuario-service:
+        condition: service_started
+      tecnico-service:
+        condition: service_started
+    networks:
+      - soporte-net
+
+networks:
+  soporte-net:
+    driver: bridge
+
+volumes:
+  mariadb_data:
